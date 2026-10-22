@@ -1,16 +1,32 @@
 name: Unpack source
+
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - "Any_Ps3_source.zip"
+
 permissions:
   contents: write
+
 jobs:
   unpack:
+    name: Unpack Any_Ps3_source.zip
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Unzip and commit
+        shell: bash
         run: |
           set -e
+          if [ ! -f Any_Ps3_source.zip ]; then
+            echo "Keine ZIP gefunden, nichts zu tun."
+            exit 0
+          fi
           mkdir _tmp
           unzip -q Any_Ps3_source.zip -d _tmp
           if [ "$(ls -A _tmp | wc -l)" = "1" ] && [ -d "_tmp/$(ls _tmp)" ]; then
