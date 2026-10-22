@@ -23,20 +23,35 @@ jobs:
         shell: bash
         run: |
           set -e
+          
           if [ ! -f Any_Ps3_source.zip ]; then
             echo "Keine ZIP gefunden, nichts zu tun."
             exit 0
           fi
+          
           mkdir _tmp
           unzip -q Any_Ps3_source.zip -d _tmp
+          
           if [ "$(ls -A _tmp | wc -l)" = "1" ] && [ -d "_tmp/$(ls _tmp)" ]; then
             cp -a "_tmp/$(ls _tmp)/." .
           else
             cp -a _tmp/. .
           fi
+          
           rm -rf _tmp Any_Ps3_source.zip
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
           git add -A
+          
+          # Prüfen, ob es Änderungen gibt, um Fehler zu vermeiden
+          git status
+          if git diff-index --quiet HEAD; then
+            echo "Keine Änderungen zum Committen vorhanden."
+            exit 0
+          fi
+          
           git commit -m "Import Any_Ps3 source"
           git push
+          
