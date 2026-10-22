@@ -1,0 +1,26 @@
+# name: Unpack source
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip and commit
+        run: |
+          set -e
+          mkdir _tmp
+          unzip -q Any_Ps3_source.zip -d _tmp
+          if [ "$(ls -A _tmp | wc -l)" = "1" ] && [ -d "_tmp/$(ls _tmp)" ]; then
+            cp -a "_tmp/$(ls _tmp)/." .
+          else
+            cp -a _tmp/. .
+          fi
+          rm -rf _tmp Any_Ps3_source.zip
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Import Any_Ps3 source"
+          git push
