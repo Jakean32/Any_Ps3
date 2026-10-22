@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+package/
+*.o
+*.apk
+*.zip
+.vs/
+.idea/
+*.iml
+.gradle/
+local.properties
+hosts/android/.cxx/
+hosts/android/app/.cxx/
+hosts/android/app/build/
+
+# Dev scratch
+*.log
