@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Palette derived from the app logo (stone 3 + mountain temple) -->
+    <color name="bg_dark">#12151A</color>
+    <color name="bg_dark_elev">#171B22</color>
+    <color name="surface">#1B1F26</color>
+    <color name="surface_light">#232833</color>
+    <color name="surface_stroke">#2E3542</color>
+    <color name="accent_gold">#AB874D</color>
+    <color name="accent_gold_bright">#C9A566</color>
+    <color name="sky_blue">#628BB4</color>
+    <color name="deep_sky">#31455A</color>
+    <color name="text_primary">#E8E6E1</color>
+    <color name="text_secondary">#A8A29A</color>
+    <color name="text_dim">#6B675F</color>
+    <color name="status_not_compiled">#8A93A3</color>
+    <color name="status_compiling">#C9A566</color>
+    <color name="status_ready">#5FBF77</color>
+    <color name="status_stale">#D98C3F</color>
+    <color name="status_failed">#C75B5B</color>
+    <color name="status_missing">#C75B5B</color>
+    <color name="error">#C75B5B</color>
+    <color name="nav_inactive">#6B675F</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+</resources>

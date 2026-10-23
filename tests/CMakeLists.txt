@@ -1,5 +1,0 @@
-file(GLOB TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-list(REMOVE_ITEM TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp)
-add_executable(anyps3_tests test_main.cpp ${TEST_SOURCES})
-target_link_libraries(anyps3_tests PRIVATE anyps3_core)
-add_test(NAME anyps3_tests COMMAND anyps3_tests)

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Any_Ps3</string>
+    <string name="tagline">AOT-recompiled PS3 launcher</string>
+    <string name="version_fmt">Any_Ps3 %1$s — %2$s</string>
+
+    <!-- Wizard -->
+    <string name="wizard_welcome_title">Welcome to Any_Ps3</string>
+    <string name="wizard_welcome_body">Any_Ps3 recompiles PS3 games (PPU/SPU) into native code for your device ahead of time, caching the result per game.\n\nYour games are NEVER copied. Any_Ps3 reads the original files in place — even after rebooting your device.\n\nA few honest notes:\n• The LLVM code-generation stage is not implemented yet. You can import, analyze and manage your library today; compilation currently runs the real analyzer and reports the rest honestly.\n• Any_Ps3 contains no Sony firmware, keys or game content.</string>
+    <string name="wizard_folder_title">Choose compile &amp; cache folder</string>
+    <string name="wizard_folder_body">Pick the folder where compiled caches will be stored. You can also import games from it later.\n\nAny_Ps3 keeps persistent read/write access to this folder — even after a reboot.</string>
+    <string name="wizard_pick_folder">Choose folder</string>
+    <string name="wizard_free_space_fmt">Free space: %1$s</string>
+    <string name="wizard_space_warning">⚠ Low free space. A compile cache needs several GiB for real games.</string>
+    <string name="wizard_cache_note_fmt">Cache folder:\n%1$s</string>
+    <string name="wizard_cache_restricted">Android restricts direct writes to this folder on Android 11+. The cache will be stored in the app\'s own storage instead (you can grant All files access later in Settings to use this folder directly).</string>
+    <string name="wizard_legal_title">Legal notice</string>
+    <string name="wizard_legal_body">Any_Ps3 is an original, clean-room engineered launcher.\n\n• It contains NO Sony firmware, decryption keys, or game content.\n• It does not bypass copy protection.\n• You may only import and compile games that you legally own. Dumping games you own may still be restricted in your country — know your local law.\n• The project is not affiliated with Sony.\n\nBy continuing you confirm that you will only use Any_Ps3 with games you own.</string>
+    <string name="wizard_accept">I understand — only games I own</string>
+    <string name="wizard_next">Next</string>
+    <string name="wizard_back">Back</string>
+    <string name="wizard_finish">Start using Any_Ps3</string>
+
+    <!-- Main / library -->
+    <string name="nav_library">Library</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_logs">Logs</string>
+    <string name="library_empty_title">No games yet</string>
+    <string name="library_empty_body">Import PS3 games you own — ISO images or folder dumps.\nNothing is copied: Any_Ps3 keeps a reference and reads the original in place.</string>
+    <string name="import_iso">Import ISO</string>
+    <string name="scan_folder">Scan folder</string>
+    <string name="refresh">Refresh</string>
+    <string name="status_not_compiled">Not compiled</string>
+    <string name="status_compiling">Compiling…</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_stale">Out of date</string>
+    <string name="status_failed">Failed</string>
+    <string name="status_missing">File missing — reselect</string>
+    <string name="action_compile">Compile</string>
+    <string name="action_recompile">Recompile</string>
+    <string name="action_delete_cache">Delete cache</string>
+    <string name="action_remove">Remove from library</string>
+    <string name="action_launch">Launch</string>
+    <string name="launch_not_ready">Launch is not available yet — the compiled-artifact loader is not implemented.</string>
+    <string name="stage_not_implemented_msg">Compiler stage not implemented yet</string>
+    <string name="missing_hint">The source file could not be reopened. Please reselect it — the record itself was kept.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_cache_folder">Compile &amp; cache folder</string>
+    <string name="settings_scan">Scan cache folder for games</string>
+    <string name="settings_import_iso">Import ISO images</string>
+    <string name="settings_space_fmt">Free space in cache location: %1$s</string>
+    <string name="settings_allfiles">All files access</string>
+    <string name="settings_allfiles_off">Not granted — cache is stored in app storage. Tap to grant (needed to write the cache to your chosen folder on Android 11+).</string>
+    <string name="settings_allfiles_on">Granted — the cache is written directly to your chosen folder.</string>
+    <string name="settings_legal">Legal notice</string>
+    <string name="settings_wizard">Re-run first-run wizard</string>
+    <string name="settings_about">About</string>
+
+    <!-- Logs -->
+    <string name="logs_title">Logs</string>
+    <string name="logs_clear">Clear view</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+</resources>

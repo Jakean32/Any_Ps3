@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:fillViewport="true">
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/settings_title"
+            android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/set_free_space"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/text_secondary" android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/set_cache_folder"
+            style="@style/SettingsButton"
+            android:text="@string/settings_cache_folder" />
+
+        <Button
+            android:id="@+id/set_scan"
+            style="@style/SettingsButton"
+            android:text="@string/settings_scan" />
+
+        <Button
+            android:id="@+id/set_import_iso"
+            style="@style/SettingsButton"
+            android:text="@string/settings_import_iso" />
+
+        <Button
+            android:id="@+id/set_allfiles"
+            style="@style/SettingsButton"
+            android:text="@string/settings_allfiles" />
+
+        <TextView
+            android:id="@+id/set_allfiles_state"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="@color/text_dim" android:textSize="12sp"
+            android:paddingStart="4dp" android:paddingEnd="4dp" />
+
+        <Button
+            android:id="@+id/set_wizard"
+            style="@style/SettingsButton"
+            android:text="@string/settings_wizard" />
+
+        <Button
+            android:id="@+id/set_legal"
+            style="@style/SettingsButton"
+            android:text="@string/settings_legal" />
+
+        <TextView
+            android:id="@+id/set_exec_strategy"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_card"
+            android:padding="14dp"
+            android:textColor="@color/text_secondary" android:textSize="12sp"
+            android:lineSpacingMultiplier="1.3" />
+
+        <TextView
+            android:id="@+id/set_about"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/text_dim" android:textSize="12sp"
+            android:paddingStart="4dp" android:paddingEnd="4dp" />
+</LinearLayout>
+</ScrollView>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Game detail bottom sheet -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_sheet"
+    android:padding="20dp">
+
+    <ImageView
+        android:id="@+id/detail_cover"
+        android:layout_width="match_parent" android:layout_height="130dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/cover_placeholder"
+        android:contentDescription="cover" />
+
+    <TextView
+        android:id="@+id/detail_title"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:textColor="@color/text_primary" android:textSize="19sp" android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/detail_subtitle"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/text_secondary" android:textSize="12sp"
+        android:fontFamily="monospace" />
+
+    <TextView
+        android:id="@+id/detail_status_note"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/text_secondary" android:textSize="13sp" />
+
+    <LinearLayout
+        android:id="@+id/detail_stages"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/detail_compile"
+            android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+            android:background="@drawable/bg_button_accent"
+            android:text="@string/action_compile"
+            android:textColor="@color/accent_gold_bright" android:stateListAnimator="@null" />
+        <Space android:layout_width="10dp" android:layout_height="1dp" />
+        <Button
+            android:id="@+id/detail_launch"
+            android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+            android:background="@drawable/bg_button"
+            android:text="@string/action_launch"
+            android:textColor="@color/text_secondary" android:stateListAnimator="@null" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/detail_delete_cache"
+            android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"
+            android:background="@drawable/bg_button"
+            android:text="@string/action_delete_cache"
+            android:textColor="@color/text_secondary" android:textSize="13sp"
+            android:stateListAnimator="@null" />
+        <Space android:layout_width="10dp" android:layout_height="1dp" />
+        <Button
+            android:id="@+id/detail_remove"
+            android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"
+            android:background="@drawable/bg_button"
+            android:text="@string/action_remove"
+            android:textColor="@color/status_failed" android:textSize="13sp"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+</LinearLayout>

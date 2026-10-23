@@ -1,0 +1,5 @@
+// Any_Ps3 Windows resources: application icon + embedded logo
+// (ICON / RCDATA are windres built-ins; no windows.h needed)
+
+1 ICON "anyps3.ico"
+LOGO_PNG RCDATA "logo_full.png"
