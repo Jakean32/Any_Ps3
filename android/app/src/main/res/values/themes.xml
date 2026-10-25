@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base app theme (dark, Material defaults are overridden in Compose). -->
+    <style name="Theme.AnyPs3" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/md_bg</item>
+        <item name="android:statusBarColor">@color/md_bg</item>
+        <item name="android:navigationBarColor">@color/md_bg</item>
+    </style>
+
+    <!-- Android 12+ system splash (core-splashscreen compat for API 26+). -->
+    <style name="Theme.AnyPs3.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_bg</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.AnyPs3</item>
+    </style>
+</resources>

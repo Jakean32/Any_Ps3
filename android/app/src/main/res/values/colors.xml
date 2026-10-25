@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Accent sampled from the Any_Ps3 logo (glass-blue 3) -->
+    <color name="anyps3_accent">#168BEA</color>
+    <color name="anyps3_accent_soft">#5DB6FF</color>
+    <color name="ic_launcher_background">#1873B2</color>
+    <color name="splash_bg">#0B0F14</color>
+
+    <color name="md_bg">#0B0F14</color>
+    <color name="md_surface">#121820</color>
+    <color name="md_surface_variant">#1A232E</color>
+    <color name="md_outline">#28323E</color>
+    <color name="md_on_bg">#E6EDF5</color>
+    <color name="md_on_surface">#DDE7F2</color>
+    <color name="md_on_surface_variant">#9FB2C6</color>
+    <color name="md_primary">#168BEA</color>
+    <color name="md_on_primary">#04121F</color>
+    <color name="md_primary_container">#0B4E8C</color>
+    <color name="md_on_primary_container">#B7DCFF</color>
+    <color name="md_secondary">#7FC0F2</color>
+    <color name="md_error">#FF7A6E</color>
+    <color name="status_ready">#54D98C</color>
+    <color name="status_outdated">#FFB255</color>
+    <color name="status_compiling">#5DB6FF</color>
+    <color name="status_not_compiled">#9FB2C6</color>
+    <color name="status_missing">#FF7A6E</color>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Files Any_Ps3 exposes through FileProvider for the diagnostics / crash-log
+     share sheet (TASK 4). Only the app's own cache + anyp3 data dir are
+     shareable; nothing else on the device is exposed. -->
+<paths>
+    <cache-path name="diagnostics" path="." />
+    <files-path name="anyps3" path="anyps3/" />
+</paths>

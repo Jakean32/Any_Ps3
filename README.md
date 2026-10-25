@@ -1,134 +1,169 @@
 # Any_Ps3
 
-**AOT-recompilation-based PlayStation 3 launcher** — for Android (arm64) and Windows (x64).
+An experimental **PlayStation 3 game launcher based on ahead-of-time (AOT)
+recompilation** instead of classic interpretation/JIT emulation: the game's PPU
+(PowerPC/Cell) and SPU code is translated once at import time into native code
+(x86-64 today, arm64 via the LLVM backend path), cached per game, and executed
+natively. The PS3 OS layer (LV2 syscalls) is provided as HLE.
 
-Any_Ps3 recompiles PS3 game code (PPU/SPU, Cell) into native code for your device *ahead of time* and caches the result per game. LV2 syscalls and cellOS run through high-level emulation (HLE); RSX graphics are destined for a modern graphics API; code that cannot be statically resolved (dynamic code, unresolved indirect branches) would run in a small fallback interpreter. **No Sony firmware, keys, or game content are included, used, or required.**
+> **Honesty first.** This repository is a working engineering foundation, not a
+> finished emulator. Everything that compiles is tested (66 automated tests
+> on the host — more with the LLVM backend linked — including PPC64 machine code
+> produced by the real GNU assembler executed **natively** through the AOT
+> pipeline). The launcher app shell runs on **Windows and Android** with the
+> real import/boot pipeline, and "Play" never pretends to run a game — it shows
+> the real boot log plus "Emulation not implemented yet". Everything not yet
+> working is listed in [PHASE_REPORTS.md](PHASE_REPORTS.md). No Sony firmware,
+> no decryption keys, and no game content are included or required by the
+> code; encrypted ISOs are decrypted only with **your own** disc key.
 
-> **Honest status:** the code-generation stages are **not implemented yet**. What ships today is the real app shell plus the genuinely implemented first stages of the pipeline (see below). The UI reports unimplemented stages verbatim — there are no fake progress bars and no fake success states.
+## What works today (tested)
 
----
-
-## Releases
-
-Every release ships **three artifacts** in `download/`:
-
-| Artifact | Contents |
+| Subsystem | Status |
 |---|---|
-| `Any_Ps3.apk` | Android app, arm64-v8a, debug-signed, no Internet permission |
-| `Any_Ps3_Windows.zip` | `Any_Ps3.exe` — statically linked x64 build with the app icon, plus logo + docs |
-| `Any_Ps3_source.zip` | Complete source (core, both frontends, tests, fixtures, build scripts) |
+| Game import: ISO9660 images, folder (JB) dumps, PARAM.SFO, ICON0 | ✅ tested |
+| **Encrypted ISO (Redump/3k3y) import: AES-128-CBC on-the-fly decrypt with a user .dkey, no copying, "needs key" state** | ✅ tested (test-key fixtures; AES OpenSSL-cross-checked) |
+| **Robust PARAM.SFO (0x0004/0x0104/0x0204/0x0404, relative layouts) + SFB/filename metadata fallbacks** | ✅ tested |
+| ELF64 PPU loader + SELF container (plaintext fSELF) | ✅ tested (encrypted retail refused **by design**; user's own decrypted EBOOT supported) |
+| **PS3 modules: ET_SCE_EXEC, OPD entry (pc+r2 TOC), TLS, argv/envp, sceModuleInfo + proc-prx_param import walk** | ✅ tested (binutils-built PS3-style fixture) |
+| **cellOS module HLE: 19 modules / 9040 public NIDs, descriptor slot patching, guest trampolines, honest ENOSYS for the rest** | ✅ tested end-to-end (real sysPrxForUser import + unknown-NID refusal) |
+| PPU decoder (integer + FP + VMX + reservations, binutils-validated) | ✅ 239-instruction ground-truth test |
+| PPU interpreter (the mandated fallback backend) | ✅ tested with real GNU-assembled programs |
+| **PPU floating point (double/single, fused mul-add, compares/converts)** | ✅ tested |
+| **PPU VMX subset (24 mnemonics) + lwarx/stwcx reservations** | ✅ tested |
+| **PPU threads (LV2 create/join/detach/exit/yield + cooperative scheduler)** | ✅ tested |
+| **AOT pipeline: PPC64 → IR → native x86-64 (MiniAOT)** | ✅ hello-world & loops run 100% natively (`ctx.icount == 0`) |
+| **LLVM backend: PPC64 → LLVM IR → .ll + x86-64 & arm64 objects, ORC execution** | ✅ tested with `-DANYPS3_WITH_LLVM` (see below) |
+| Interpreter fallback for un-liftable blocks | ✅ tested mixed-mode + fault paths |
+| Guest memory manager (PS3 layout, 64 KiB pages, exec tracking) | ✅ tested |
+| LV2 HLE: process/tty/memory/fs/time syscalls (verified numbers) | ✅ end-to-end hello world |
+| SPU: decoder (199-op ISA table), interpreter, mailboxes, MFC DMA | ✅ tested incl. PPU↔SPU syscall loop |
+| SPU ELF32 loader + thread groups (create/init/start/join) | ✅ tested |
+| Shader cache (content-addressed), audio ring, input mapping | ✅ tested |
+| AOT disk cache manifests (module hash + lifter version) | ✅ tested |
+| **Built-in hello demo (real pipeline install + boot + execute)** | ✅ tested on Linux, Windows (Wine), and in the Android native lib build |
+| **Windows app shell: static Any_Ps3.exe (ImGui + Win32 + D3D11)** | ✅ built; `--selftest` + GUI verified under Wine 10 / Xvfb |
+| **Android app shell: arm64-v8a debug-signed APK (Compose)** | ✅ built; verified with aapt2/apkanalyzer/apksigner (no on-device run yet) |
+| **Android app v0.6.0: log export to Downloads (MediaStore), in-app log viewer + crash report, high-contrast theme, real adaptive icon** | ✅ build-verified (dex contains the new classes; on-device test is the user's install) |
 
-`Any_Ps3_source.zip` accompanies **every** release, so any artifact can be rebuilt from source with the documented toolchain.
+## Not working yet (see PHASE_REPORTS.md for the full list)
 
-## What is implemented (honest capability map)
+- Encrypted retail SELF/EBOOT: Any_Ps3 ships no keys (legal requirement) —
+  supply your own decrypted executable in per-game settings instead.
+- UDF disc images (folder dumps + ISO9660 work).
+- Full VMX (subset of 24 done), FP exception flags/rounding modes, real GCM
+  command parsing, Vulkan rendering, true SMP PPU threads (cooperative only),
+  SPURS, cellFs SPRX NIDs (first bring-up log will pin them), per-thread TLS.
+- The LLVM backend runs in the dev/CI host (LLVM 19 dev packages present); it
+  is NOT yet linked into the shipped Windows/Android hosts (interpreter there).
+- Real game execution: "Play" boots the real pipeline and reports exactly
+  where it stops (bring-up log). Rendering/pad/audio are the next milestones.
 
-| Area | Status |
-|---|---|
-| PARAM.SFO parsing (TITLE, TITLE_ID, APP_VER, CATEGORY, ints) | ✅ implemented, tested |
-| ISO9660 reader over abstract byte sources (random access, no full-image loads) | ✅ implemented, tested |
-| Reads through raw file descriptors (Android SAF / `ParcelFileDescriptor`) | ✅ implemented, tested |
-| No-copy import (URIs/paths stored, only small thumbnails cached) | ✅ implemented, tested |
-| Missing-source detection ("File missing — please reselect") | ✅ implemented, tested |
-| Thumbnail cache (stb decode → downscale → PNG/JPEG) | ✅ implemented, tested |
-| Per-game cache manifest (format, versions, source hash, status, stages) | ✅ implemented, tested |
-| Staleness detection (source hash mismatch → "Out of date") | ✅ implemented, tested |
-| PPU ELF64 big-endian / PRX overlay loader | ✅ implemented, tested |
-| PowerPC branch/call scanner (direct, conditional, indirect classification) | ✅ implemented, tested |
-| Compile pipeline orchestration with **real** progress reporting | ✅ implemented, tested |
-| LV2 syscall HLE framework (table, dispatch, TTY, memory basics, ENOSYS for the rest) | ✅ implemented, tested |
-| Encrypted-EBOOT detection (retail `EBOOT.BIN` → honest "blocked" state) | ✅ implemented, tested |
-| First-run wizard, library/settings/logs UI, splash, both platforms | ✅ implemented |
-| LLVM IR lifting | ❌ **not implemented yet** |
-| Native code generation (x64/ARM64) | ❌ **not implemented yet** |
-| Executable-artifact loader / game launch | ❌ **not implemented yet** |
-| RSX graphics, cellOS module HLE beyond the framework | ❌ **not implemented yet** |
+## Building
 
-## Architecture
-
-```
-core/                  portable C++17, zero dependencies (host, Android, Windows)
-  util.{h,cpp}         SHA-256, paths, fs, free space
-  bytesource.{h,cpp}   FileSource | FdSource (raw POSIX fd) | MemSource
-  sfo.{h,cpp}          PARAM.SFO parser
-  iso9660.{h,cpp}      ISO9660 over any ByteSource (SAF-compatible)
-  thumbs.{h,cpp}       stb_image decode → resize → encode (small thumbnails only)
-  game_import.{h,cpp}  no-copy records, folder scans, refresh, library.json
-  cache_manifest.{h,cpp} <cache>/<GAME_ID>/{manifest.json, logs/, code/, thumbs/}
-  recompiler.{h,cpp}   PPU ELF loader, branch scanner, honest compile pipeline
-  lv2.{h,cpp}          syscall table + small built-in set
-  library.{h,cpp}      facade + config.json
-android/               Java + framework Views shell (no Gradle needed), JNI bridge
-windows/               Dear ImGui (Win32 + D3D11) shell, static x64
-tests/core_tests.cpp   40 tests (see below)
-fixtures/              generated test fixtures (SFO, PNGs, crafted PPC64 ELF, real ISO)
-scripts/               asset pipeline, fixture generator, build + package scripts
+### Core + tests (Linux/macOS dev host — this is the well-tested path)
+```bash
+make test          # or: scripts/run_tests.sh
+# CMake equivalent:
+cmake -S . -B build && cmake --build build -j && ctest --test-dir build
 ```
 
-### No-copy import (both platforms)
+### Windows (Any_Ps3.exe → Any_Ps3-<version>-Windows-x64.zip)
 
-Games are **never copied** into app storage. A `GameRecord` stores only the reference (filesystem path on Windows, SAF `content://` URI on Android) plus small metadata. All reads go through `ByteSource`:
-- **Android**: the wizard and imports take *persistable* URI permissions (`takePersistableUriPermission`), so sources stay accessible across reboots. Reads use `ParcelFileDescriptor` → raw fd → `FdSource::pread`-style random access. Covers are extracted once and cached as small thumbnails (ICON0 ≤ 320 px PNG, PIC1 ≤ 480 px JPEG).
-- **Windows**: plain filesystem paths, same core.
-
-### Compile cache & executable-code strategy
-
+Cross-build with MinGW-w64 (no Visual Studio needed; also the CI path):
+```bash
+sudo apt install g++-mingw-w64-x86-64 mingw-w64-x86-64-dev   # Debian/Ubuntu
+scripts/build_windows_mingw.sh          # → build/windows-mingw/Any_Ps3.exe
 ```
-<cache root>/<GAME_ID>/
-    manifest.json    # format version, anyps3 version, source hash, status, stage results
-    logs/            # one real log per compile run
-    code/            # future AOT artifacts (data files)
-    thumbs/          # cover thumbnails
+The exe is statically linked (`-static -static-libgcc -static-libstdc++`); at
+runtime it only loads Windows system DLLs (d3d11, d3dcompiler_47, user32, ...).
+Smoke test on any Windows machine: `Any_Ps3.exe --selftest` (exit 0 = the full
+demo pipeline passed; writes `selftest.log` next to the exe).
+Also available headless: `--diag-test` (diagnostics report), `--crash-test`
+(crash handler writes `data/crash_last.txt`).
+MSVC path (older alternative): `scripts/build_windows.ps1` (hosts/desktop).
+
+### Android (Any_Ps3-<version>-arm64.apk, arm64-v8a, debug-signed)
+```bash
+# one-time: install SDK bits under tools/android-sdk (or any ANDROID_HOME):
+sdkmanager "platforms;android-35" "build-tools;35.0.0" \
+          "ndk;27.2.12479018" "cmake;3.22.1"
+scripts/build_android.sh                # → download/Any_Ps3-<version>-arm64.apk
 ```
+The Gradle wrapper is committed (`hosts/android/gradlew`), so only a JDK 17+
+is required. In this repo the APK was built with AGP 8.7.3 + Kotlin 2.0.21 +
+NDK r27.2 + CMake 3.22.1.
 
-Statuses: `not_compiled → compiling → ready`, plus `stale` (source changed) and `failed`. `ready` is unreachable today because the codegen stages are not implemented — the manifest records each stage's honest state (`ok` / `not_implemented` / `blocked` / `failed`).
+### Versioning
+The version string lives in ONE file: `VERSION` at the repo root. It is read
+by the root CMakeLists, hosts/windows + hosts/desktop + the Android native
+CMakeLists (injected as `ANYPS3_VERSION`; the Android build re-configures
+when the file changes), the dev Makefile, and Gradle (versionName). Both
+UIs display the compiled-in string, so the app, its binaries and its
+packages always agree. `versionCode` is a separate monotonic counter in
+Gradle (bumped once per release).
 
-**Android executable strategy (documented choice):** shared storage (SAF) never allows executable mappings, so compiled artifacts are stored as plain *data* files under the user-chosen folder; at launch they would be copied into the app's *private* directory where execution is permitted (the alternative — anonymous `mmap(PROT_EXEC)` — was considered and rejected because it complicates relocation). The artifact loader itself is not implemented yet; the UI reports this honestly. On Android 11+ direct writes to a user-chosen shared folder additionally require "All files access" (the wizard and settings explain this and fall back to app storage, telling the user exactly where the cache lives).
-
-## Tests — 40/40 passing
-
-Built and run on the host (g++) and, as a Windows cross-build, under Wine 10.0 (both 40/40):
-
-- **SFO (4):** fixture parse, bad-magic rejection, second fixture, all-fields presence
-- **ISO9660 (6):** PVD validation, non-ISO rejection, PARAM.SFO lookup, icon/PIC1 lookup, **random reads via raw fd** (required new test), missing-file error
-- **Import (6):** folder game, ISO game, **no-copy verification** (source byte-identical, cache only small thumbs), missing-source flagging, multi-game scan, persistence roundtrip incl. SAF-style URIs
-- **Manifest (5):** defaults on create, **JSON roundtrip** (required new test), status transitions, staleness detection, future-version rejection
-- **Recompiler (7):** ELF fixture load, garbage rejection, branch/call scan, nop/data not branches, honest not-implemented codegen, **real progress verification**, encrypted-EBOOT "blocked" state
-- **LV2 (4):** register/dispatch, unknown→ENOSYS, TTY capture, memory basics
-- **Utils (4):** SHA-256 known vectors, path utils, free-space query, mini-JSON roundtrip
-- **Integration (4):** full library flow (import→compile→log→recompile→delete-cache→remove), thumbnail generation, config persistence, scan aggregation
-
-*(History: an earlier session had a 34-test suite; the sandbox was reset and the suite was rebuilt from scratch with equivalent-plus coverage. The three tests explicitly required — SFO parse, ISO read via file descriptor, cache manifest — are included and passing.)*
-
-## Building from source
-
-Host prerequisites: any C++17 toolchain; for the full pipeline, an Android SDK (build-tools, platform, NDK) and mingw-w64.
-
-```
-# core + tests (host)
-g++ -std=c++17 -O2 -o core_tests core/*.cpp tests/core_tests.cpp   # then run it
-
-# fixtures (needed by tests)
-python3 scripts/gen_fixtures.py          # needs genisoimage for the ISO fixture
-
-# assets (regenerates icons/ico from the logo)
-python3 scripts/gen_assets.py
-
-# Android APK (arm64, debug-signed)
-scripts/build_apk.sh                     # aapt2/javac/d8/zipalign/apksigner + NDK
-
-# Windows exe (static x64 with icon)
-scripts/build_windows.sh                 # mingw-w64 + windres
-
-# Windows test binary + Wine verification
-scripts/build_tests_wine.sh              # builds and runs 40 tests under Wine
+### Optional backends
+```bash
+cmake -DANYPS3_LLVM=ON ...      # LLVM AOT backend (needs LLVM dev packages)
+cmake -DANYPS3_VULKAN=ON ...    # Vulkan RSX backend skeleton (needs Vulkan SDK)
 ```
 
-## Verification performed on this release (reported honestly)
+### CI (reproducibility)
+`.github/workflows/` builds and tests everything on every push:
+`core-tests.yml` (37 tests), `windows-build.yml` (MinGW cross-build + zip
+artifact), `android-build.yml` (APK artifact + verification).
 
-**APK** — built with aapt2/javac(core-lambda-stubs)/d8(build-tools 35)/zipalign/apksigner; verified with `aapt dump badging` (package `com.anyps3.app`, minSdk 26, target 34, launchable `SplashActivity`, `arm64-v8a` native code, adaptive icon all densities, no INTERNET permission), `apksigner verify` (debug cert), `dexdump` (all app classes present), and `apkanalyzer` (manifest + dex). *Not run on a physical device/emulator in the build sandbox* — install it and report anything odd.
+## Using it (first run)
 
-**Windows** — `Any_Ps3.exe` is PE32+ x64, statically linked (only system DLLs imported: d3d11, dxgi, D3DCompiler_47, gdi32, user32, shell32, ole32, dwmapi, kernel32, msvcrt); icon verified with `pefile` (7 RT_ICON frames 16–256 px + group). The core test suite was cross-built and executed **under Wine 10.0: 40/40 passed**. The GUI exe ran under Wine with a virtual display, created its window, initialized D3D11 and rendered the shell (screenshot shipped in the zip). Not run on a physical Windows machine by the build sandbox.
+1. **Legal notice:** the app asks for a one-time confirmation that you only
+   import games you own and dumped legally.
+2. The library starts with one built-in entry, "Hello World (Any_Ps3 demo)" —
+   the same PPC64 ELF the automated tests validate. **Play** on it executes it
+   for real (PPU interpreter; prints "Hello from Any_Ps3!" via emulated
+   `sys_tty_write`, exits with code 42).
+3. **Add game** — pick a PS3 game folder (JB dump) or ISO image. The title,
+   ID and cover icon are read from PARAM.SFO/ICON0. Windows: the file dialog
+   alternates between ISO and folder mode; Android: Storage Access Framework.
+4. **Encrypted retail EBOOT** — the disc executable is an encrypted SELF;
+   Any_Ps3 ships no keys. Per-game settings → "Decrypted executable" → pick
+   your own decrypted ELF/fSELF (from your own legal dump, with your own
+   tools) and Play boots it. Retail-encrypted files are refused honestly.
+5. **Play on a real game** — runs the real boot pipeline and shows the
+   bring-up log: linked imports, MISSING exports (called ones first), the
+   first unimplemented syscall by name. Rendering is not implemented yet —
+   send that log back and the next release fixes the top entries.
+6. **Settings** — per-game (disc key, decrypted executable, PPU backend,
+   controller mapping) and global (data/cache locations, log level).
+
+## Repository layout
+```
+core/            portable C++17 core (no external dependencies)
+  memory/        PS3 guest memory (flat 512 MiB window, 64 KiB pages)
+  cpu/ppu/       decoder, interpreter, AOT-IR lifter, MiniAOT x64, LLVM slot
+  cpu/spu/       SPU decoder (generated table), interpreter, MFC/mailboxes
+  demo/          built-in hello-world demo (shipped sample ELF)
+  hle/           LV2 syscalls (verified numbers) + sys_spu manager
+  gfx/           RSX backend interface, null backend, shader cache
+  audio/ input/  backends + mapping
+  loader/ fs/    ELF/SELF loaders, ISO9660, import pipeline, library
+  runtime/       Emulator orchestration, AOT disk cache
+  platform.h     portability layer (Linux / MinGW / Android NDK)
+hosts/
+  windows/       Dear ImGui + Win32 + D3D11 host (single static exe)
+  android/       Kotlin/Compose host + NDK build + JNI bridge + gradlew
+  desktop/       older SDL2 host (kept for the MSVC build_windows.ps1 path)
+third_party/     vendored: Dear ImGui 1.91.9b (MIT), stb_image (public domain)
+tests/           37 tests incl. GNU-assembled PPC64 fixtures (see fixtures/)
+tools/reference/ verified syscall table, SPU ISA rows, binutils ground truth
+.github/         CI: core tests + Windows cross-build + Android APK
+```
 
 ## Legal
 
-Any_Ps3 is an original, clean-room engineering effort. It contains no Sony firmware, decryption keys, or game content, and does not bypass copy protection. You may only import and compile games you legally own; creating backups of your own games may be restricted in your country. This project is not affiliated with Sony.
+MIT licensed (see LICENSE). You must supply your own legally-dumped games and
+content. Any_Ps3 ships no Sony code, firmware, or keys and cannot decrypt
+retail executables. See LICENSES.md for third-party component licenses.
+
+Do not ask for or distribute key material, firmware, or copyrighted game data
+in relation to this project.

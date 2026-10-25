@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Any_Ps3 adaptive launcher icon (v0.6.0): gold "3" over a night-blue
+     gradient with the brand's mountain silhouette. Monochrome layer gives
+     Android 13 themed icons (tinted by the user's wallpaper). -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_bg" />
+    <foreground android:drawable="@mipmap/ic_launcher_fg" />
+    <monochrome android:drawable="@mipmap/ic_launcher_mono" />
+</adaptive-icon>

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Splash window background: full logo centered on dark background -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/bg_dark" />
-    <item android:drawable="@drawable/logo_full" android:gravity="center" />
-</layer-list>

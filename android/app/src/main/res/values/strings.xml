@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Any_Ps3</string>
+    <string name="wizard_welcome_title">Welcome to Any_Ps3</string>
+    <string name="wizard_welcome_body">Any_Ps3 recompiles PS3 game code ahead of time for your device. It includes no games, firmware or keys — you add your own legally dumped content.</string>
+    <string name="wizard_folder_title">Choose the compile/cache folder</string>
+    <string name="wizard_folder_body">Compiled game data will be stored here, structured as <folder>/<GameID>/. Nothing is ever copied out of your game dumps.</string>
+    <string name="wizard_legal_title">Legal notice</string>
+    <string name="wizard_legal_body">This app does not include Sony firmware, decryption keys, or any game content. Encrypted executables cannot be decrypted here. You are responsible for using content you legally own.</string>
+    <string name="legal_accept">I understand: no games, firmware or keys are included; I supply my own legally dumped content.</string>
+    <string name="library_title">Library</string>
+    <string name="settings_title">Settings</string>
+    <string name="log_title">Log</string>
+    <string name="add_games">Add games</string>
+    <string name="empty_library_hint">Add your legally dumped PS3 games\n(ISO files or folder dumps) to get started.</string>
+    <string name="file_missing">File missing or moved — re-select it</string>
+    <string name="compile">Compile</string>
+    <string name="recompile">Recompile</string>
+    <string name="delete_cache">Delete cache</string>
+    <string name="not_implemented_note">Compiler stage not implemented yet — shown honestly, no fake progress.</string>
+</resources>
