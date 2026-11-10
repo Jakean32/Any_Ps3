@@ -1,0 +1,40 @@
+name: ZIP to EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build self-extracting EXE
+        shell: bash
+        run: |
+          SEVENZ="/c/Program Files/7-Zip"
+
+          # 1. unpack the ZIP
+          mkdir payload
+          "$SEVENZ/7z.exe" x UnityHubSetup-x64.zip -opayload
+
+          # 2. find the exe inside (path relative to the extract folder)
+          EXE=$(cd payload && find . -name '*.exe' | head -1 | sed 's|^\./||')
+          EXE_WIN="${EXE//\//\\}"
+          echo "Run after extract: $EXE_WIN"
+
+          # 3. repack as .7z (SFX needs 7z format)
+          "$SEVENZ/7z.exe" a -t7z -mx=9 payload.7z ./payload/*
+
+          # 4. SFX config
+          printf ';!@Install@!UTF-8!\nTitle="UnityHubSetup-x64"\nRunProgram="%s"\n;!@InstallEnd@!\n' "$EXE_WIN" > config.txt
+
+          # 5. glue SFX module + config + archive
+          cat "$SEVENZ/7z.sfx" config.txt payload.7z > UnityHubSetup-x64-SFX.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UnityHubSetup-x64-SFX
+          path: UnityHubSetup-x64-SFX.exe
